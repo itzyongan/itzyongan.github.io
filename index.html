@@ -668,6 +668,23 @@
       let state = 'joined', anchor = 0, lastY = scrollY;
       let rejoinTimer, landedAt = 0;   // landedAt: when the nav finishes sliding back down after being hidden
       const HIDE_AFTER = 60;   // px of extra scrolling down before the logo and toggle hide
+      // Nav link click: keep the nav visible while the smooth scroll runs
+      let navLock = false, lockTimer;
+      function unlockNav() {
+        clearTimeout(lockTimer);
+        if (!navLock) return;
+        navLock = false;
+        lastY = Math.max(scrollY, 0);
+        anchor = lastY;
+        setState(lastY > 8 ? 'split' : 'joined');
+      }
+      function lockNav() {
+        navLock = true;
+        clearTimeout(lockTimer);
+        lockTimer = setTimeout(unlockNav, 1200); // fallback if no scroll happens
+      }
+      ['wheel', 'touchstart'].forEach((t) => addEventListener(t, unlockNav, { passive: true }));
+      addEventListener('keydown', (e) => { if (e.key !== 'Escape') unlockNav(); });
 
       function setState(next) {
         state = next;
@@ -679,6 +696,12 @@
 
       addEventListener('scroll', () => {
         const y = Math.max(scrollY, 0);
+        if (navLock && y > 8) {
+          lastY = y;
+          clearTimeout(lockTimer);
+          lockTimer = setTimeout(unlockNav, 150); // scroll settled
+          return;
+        }
         if (y <= 8) {
           lastY = y;
           clearTimeout(rejoinTimer);
@@ -741,7 +764,7 @@
       addEventListener('resize', () => { nav.classList.add('static'); layoutNav(); settle(); });
 
       menuBtn.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
-      nav.querySelectorAll('div a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+      nav.querySelectorAll('div a').forEach((a) => a.addEventListener('click', () => { lockNav(); setMenu(false); }));
       addEventListener('pointerdown', (e) => { if (!nav.contains(e.target)) setMenu(false); });
       addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
       matchMedia('(min-width: 641px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });

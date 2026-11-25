@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
@@ -101,7 +101,7 @@
       to   { transform: scale(1.18) rotate(25deg); border-radius: 58% 42% 55% 45%; }
     }
 
-    nav, .feature, .link, .skill, .btn:not(.p) {
+    .feature, .link, .skill, .btn:not(.p) {
       background: var(--glass);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-edge), var(--glass-shadow);
@@ -109,35 +109,27 @@
       backdrop-filter: blur(22px) saturate(180%);
     }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      nav, .feature, .link, .skill, .btn:not(.p) { background: var(--inner); }
+      .feature, .link, .skill, .btn:not(.p) { background: var(--inner); }
     }
 
     nav {
       position: sticky;
       top: calc(env(safe-area-inset-top, 0px) + 14px);
       z-index: 10;
-      margin-top: 18px;
-      padding: 9px 20px;
       border-radius: 99px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: transform .45s cubic-bezier(.4,0,.2,1);
     }
 
     .menu-btn {
       display: none;
       position: relative;
-      width: 40px;
-      height: 40px;
-      margin: -4px 0;
       padding: 0;
       border: 0;
-      border-radius: 50%;
+      border-radius: 99px;
       background: none;
       color: var(--text);
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+      transform: translateX(var(--mx, 0px));
     }
     .menu-btn span {
       position: absolute;
@@ -154,7 +146,7 @@
     nav.open .menu-btn span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
     nav.open .menu-btn span:nth-child(2) { opacity: 0; }
     nav.open .menu-btn span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
-    .logo { font-weight: 700; font-size: 1rem; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0; }
+    .logo { font-weight: 700; font-size: 1rem; letter-spacing: -.02em; white-space: nowrap; }
     .logo b { color: var(--accent); }
     nav div a { color: var(--muted); text-decoration: none; margin-left: 20px; font-size: .9rem; transition: color .2s; }
     nav div a:hover { color: var(--text); }
@@ -245,10 +237,10 @@
     }
 
     .feature, .link, .skill, .btn { position: relative; }
-    nav, .feature, .link, .skill, .btn { --gx: 50%; --gy: 0%; --r: 220px; }
+    .feature, .link, .skill, .btn { --gx: 50%; --gy: 0%; --r: 220px; }
     .feature { --r: 300px; }
 
-    nav::after, .feature::after, .link::after, .skill::after, .btn::after {
+    .feature::after, .link::after, .skill::after, .btn::after {
       content: "";
       position: absolute;
       inset: -1px;
@@ -262,7 +254,7 @@
       -webkit-mask-composite: xor;
       mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
     }
-    nav:hover::after, .feature:hover::after, .link:hover::after, .skill:hover::after, .btn:hover::after,
+    .feature:hover::after, .link:hover::after, .skill:hover::after, .btn:hover::after,
     .tap::after { opacity: 1; }
 
     .feature:hover { transform: scale(1.005); }
@@ -335,51 +327,59 @@
       .feature .btns .btn { flex: 1 1 0; }
     }
 
-    /* ===== Nav: one pill -> pieces split apart -> logo & toggle hide ===== */
+    /* Joined pill splits into separate glass pieces, then hides on further scroll. */
     nav {
-      /* the joined pill's glass lives on ::before so the pieces can detach */
       background: none; border: 0; box-shadow: none;
       -webkit-backdrop-filter: none; backdrop-filter: none;
       display: grid;
-      grid-template-columns: 1fr auto 1fr;   /* logo left, links dead-centre, toggle right: nothing moves on scroll */
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
       width: 100%; margin: 18px 0 0; padding: 0;
       transition: transform .45s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
     }
-    nav.split::after { display: none; }
 
     nav::before, .logo::before, .theme-btn::before, .menu-btn::before, nav div::before {
       content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-      border-radius: 99px;
       background: var(--glass); border: 1px solid var(--glass-border);
       box-shadow: var(--glass-edge), var(--glass-shadow);
       -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+    }
+    nav::before {
+      border-radius: 99px;
+      left: var(--pl, 0px); right: var(--pr, 0px); opacity: 1;
+      transition: opacity .15s ease, left .9s cubic-bezier(.32,.72,0,1), right .9s cubic-bezier(.32,.72,0,1);
+    }
+    nav.split::before {
+      left: 0; right: 0; opacity: 0;
+      transition: opacity .1s ease, left .9s cubic-bezier(.32,.72,0,1), right .9s cubic-bezier(.32,.72,0,1);
+    }
+    .logo::before, .theme-btn::before, .menu-btn::before, nav div::before {
+      opacity: 0;
+      border-radius: inherit;
       transition: opacity .15s ease;
     }
-    .logo::before, .theme-btn::before, .menu-btn::before, nav div::before { opacity: 0; }
-    nav::before, nav::after { left: var(--pl, 0px); right: var(--pr, 0px); }
-    nav::after { left: calc(var(--pl, 0px) - 1px); right: calc(var(--pr, 0px) - 1px); }
-    /* contracting: the pill connects instantly and its edges travel with the pieces */
-    nav::before { transition: opacity .15s ease, left .9s cubic-bezier(.32,.72,0,1), right .9s cubic-bezier(.32,.72,0,1); }
-    nav.split::before { left: 0; right: 0; }
-    nav.split::before { opacity: 0; }
-    nav { pointer-events: none; }
-    .logo, nav div, .theme-btn, .menu-btn { pointer-events: auto; }
-    nav.split .logo::before, nav.split .theme-btn::before, nav.split .menu-btn::before, nav.split div::before { opacity: 1; }
-    /* expanding: swap glass instantly so no pill is left behind in the centre while the pieces move apart */
-    nav.split::before, nav.split .logo::before, nav.split .theme-btn::before, nav.split .menu-btn::before, nav.split div::before {
+    nav.split .logo::before, nav.split .theme-btn::before, nav.split .menu-btn::before, nav.split div::before {
+      opacity: 1;
       transition: opacity .1s ease;
     }
+    .logo, nav div, .theme-btn, .menu-btn { pointer-events: auto; }
 
-    .logo { position: relative; isolation: isolate; justify-self: start; padding: 0 20px; line-height: 52px; will-change: transform;
-            transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .9s cubic-bezier(.32,.72,0,1), visibility 0s; }
+    .logo {
+      position: relative; isolation: isolate; justify-self: start;
+      padding: 0 20px; line-height: 52px; border-radius: 99px; will-change: transform;
+      transform: translateX(var(--lx, 0px));
+      transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .9s cubic-bezier(.32,.72,0,1), visibility 0s;
+    }
 
     .theme-btn {
       position: relative; isolation: isolate; justify-self: end; flex-shrink: 0;
       width: 52px; height: 52px; margin: 0; padding: 0;
-      border: 0; border-radius: 50%; background: none; color: var(--text); cursor: pointer;
+      border: 0; border-radius: 99px; background: none; color: var(--text); cursor: pointer;
       display: grid; place-items: center;
-      will-change: transform; transition: background .2s, opacity .7s cubic-bezier(.4,0,.2,1), transform .9s cubic-bezier(.32,.72,0,1), visibility 0s;
+      will-change: transform;
+      transform: translateX(var(--tx, 0px));
+      transition: background .2s, opacity .7s cubic-bezier(.4,0,.2,1), transform .9s cubic-bezier(.32,.72,0,1), visibility 0s;
     }
     .theme-btn:hover { background: var(--inner); }
     .theme-btn svg { grid-area: 1 / 1; width: 18px; height: 18px; transition: transform .5s cubic-bezier(.34,1.56,.64,1), opacity .25s; }
@@ -387,20 +387,13 @@
     :root[data-theme="dark"] .theme-btn .sun { opacity: 1; transform: none; }
     :root[data-theme="dark"] .theme-btn .moon { opacity: 0; transform: rotate(90deg) scale(.5); }
 
-    /* no transitions while the page loads or resizes, so the nav appears already in place */
-    nav.static, nav.static *, nav.static::before, nav.static::after, nav.static *::before { transition: none !important; }
+    nav.static, nav.static *, nav.static::before, nav.static *::before { transition: none !important; }
 
-    /* second scroll: every piece hides completely */
     nav.gone .logo, nav.gone .theme-btn, nav.gone .menu-btn {
       pointer-events: none; visibility: hidden;
       transition: transform .8s cubic-bezier(.45,0,.2,1), visibility 0s .8s;
     }
 
-    /* main page: logo and toggle sit right next to the links bar (offsets measured in JS) */
-    .logo { transform: translateX(var(--lx, 0px)); }
-    .theme-btn { transform: translateX(var(--tx, 0px)); }
-    .menu-btn { transform: translateX(var(--mx, 0px)); }
-    /* first scroll: expand outward to the full-width positions while the glass disconnects */
     nav.split .logo, nav.split .theme-btn, nav.split .menu-btn { transform: none; }
     nav.gone .logo { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 40px)); }
     nav.gone .theme-btn { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px) - 40px)); }
@@ -421,25 +414,6 @@
                    transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .9s cubic-bezier(.32,.72,0,1), visibility 0s; }
     }
 
-    /* ===== Seamless morph: three fully rounded glass pieces that touch when joined and pull apart on scroll =====
-       The single pill connects instantly on contract; its edges ride along with the pieces. */
-    nav::after { display: none; }
-    /* contracting: the pill connects immediately and its edges travel with the pieces */
-    nav::before { left: var(--pl, 0px); right: var(--pr, 0px); opacity: 1;
-                  transition: opacity .15s ease, left .9s cubic-bezier(.32,.72,0,1), right .9s cubic-bezier(.32,.72,0,1); }
-    nav.split::before { left: 0; right: 0; opacity: 0;
-                        transition: opacity .1s ease, left .9s cubic-bezier(.32,.72,0,1), right .9s cubic-bezier(.32,.72,0,1); }
-    .logo::before, .theme-btn::before, .menu-btn::before, nav div::before {
-      border-radius: inherit;
-      transition: opacity .15s ease;
-    }
-    nav.split .logo::before, nav.split .theme-btn::before, nav.split .menu-btn::before, nav.split div::before {
-      transition: opacity .1s ease;
-    }
-    .logo, .theme-btn, .menu-btn { border-radius: 99px; }
-    @media (min-width: 641px) {
-      nav div { border-radius: 99px; }
-    }
   </style>
 </head>
 
@@ -735,19 +709,17 @@
       function layoutNav() {
         const set = (k, v) => nav.style.setProperty(k, v.toFixed(1) + 'px');
         if (innerWidth > 640) {
-          const gap = 0;
-          set('--lx', linksEl.offsetLeft - gap - (logoEl.offsetLeft + logoEl.offsetWidth));
-          set('--tx', linksEl.offsetLeft + linksEl.offsetWidth + gap - themeBtn.offsetLeft);
+          set('--lx', linksEl.offsetLeft - (logoEl.offsetLeft + logoEl.offsetWidth));
+          set('--tx', linksEl.offsetLeft + linksEl.offsetWidth - themeBtn.offsetLeft);
           set('--mx', 0);
           set('--pl', logoEl.offsetLeft + parseFloat(nav.style.getPropertyValue('--lx')));
           set('--pr', nav.offsetWidth - (themeBtn.offsetLeft + themeBtn.offsetWidth + parseFloat(nav.style.getPropertyValue('--tx'))));
         } else {
-          const gap = 0;
-          const total = logoEl.offsetWidth + gap + themeBtn.offsetWidth + gap + menuBtn.offsetWidth;
+          const total = logoEl.offsetWidth + themeBtn.offsetWidth + menuBtn.offsetWidth;
           const start = (nav.offsetWidth - total) / 2;
           set('--lx', start - logoEl.offsetLeft);
-          set('--tx', start + logoEl.offsetWidth + gap - themeBtn.offsetLeft);
-          set('--mx', start + logoEl.offsetWidth + gap + themeBtn.offsetWidth + gap - menuBtn.offsetLeft);
+          set('--tx', start + logoEl.offsetWidth - themeBtn.offsetLeft);
+          set('--mx', start + logoEl.offsetWidth + themeBtn.offsetWidth - menuBtn.offsetLeft);
           set('--pl', start);
           set('--pr', nav.offsetWidth - start - total);
         }
@@ -784,7 +756,7 @@
 
       if (!canHover) return;
 
-      const GLASS = 'nav, .feature, .link, .skill, .btn';
+      const GLASS = '.feature, .link, .skill, .btn';
 
       addEventListener('pointermove', (e) => {
         if (e.pointerType !== 'mouse') return;

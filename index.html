@@ -73,7 +73,7 @@
     }
 
     html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 90px); scroll-behavior: smooth; touch-action: manipulation; }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; touch-action: manipulation; }
     body {
       margin: 0;
       background: var(--bg);
@@ -829,6 +829,17 @@
           blob.style.translate = `${cx * depth[i]}px ${cy * depth[i]}px`;
         });
       });
+    })();
+  </script>
+  <script>
+    // Block double-tap-to-zoom on touch devices (pinch zoom still works)
+    (() => {
+      let last = 0;
+      addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - last < 300 && e.cancelable) e.preventDefault();
+        last = now;
+      }, { passive: false });
     })();
   </script>
 </body>
